@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --font-sans: "Avenir Next", "Segoe UI", "Noto Sans", Arial, sans-serif;
+}
+
+:root {
+  --background: #f6f8f5;
+  --surface: #ffffff;
+  --surface-raised: #eef3ed;
+  --foreground: #14221c;
+  --muted: #64716a;
+  --border: #dce4de;
+  --brand: #087f5b;
+  --brand-strong: #056144;
+  --brand-soft: #dcf5e9;
+  --success: #087f5b;
+  --danger: #b42318;
+}
+
+.dark {
+  --background: #0d1511;
+  --surface: #131e18;
+  --surface-raised: #1a2820;
+  --foreground: #edf5ef;
+  --muted: #9baba1;
+  --border: #2a3a30;
+  --brand: #4fd1a1;
+  --brand-strong: #78e2ba;
+  --brand-soft: #173d2e;
+  --success: #4fd1a1;
+  --danger: #ff8a80;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  touch-action: manipulation;
+}
+
+::selection {
+  background: var(--brand-soft);
+  color: var(--foreground);
+}
+
+.container-shell {
+  width: min(100% - 2rem, 72rem);
+  margin-inline: auto;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.hero-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--border) 42%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--border) 42%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(to bottom, black, transparent 92%);
+}
+
+.glow {
+  background: radial-gradient(circle, color-mix(in srgb, var(--brand) 16%, transparent), transparent 68%);
+  filter: blur(12px);
+}
+
+.animate-enter {
+  animation: enter 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-enter-delay {
+  animation: enter 560ms 100ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
