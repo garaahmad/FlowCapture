@@ -1,0 +1,38 @@
+{
+  "name": "@flowcapture/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --hostname 0.0.0.0 --port 3000",
+    "start": "node .next/standalone/apps/web/server.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@flowcapture/shared-types": "0.1.0",
+    "@flowcapture/workflow-schema": "0.1.0",
+    "@hookform/resolvers": "6.0.1",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@tanstack/react-query": "5.105.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "1.62.0",
+    "next": "16.4.3",
+    "next-themes": "0.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-hook-form": "7.91.0",
+    "tailwind-merge": "^3.4.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint-config-next": "16.4.3",
+    "jsdom": "^27.1.0",
+    "tailwindcss": "4.3.3"
+  }
+}

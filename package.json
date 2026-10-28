@@ -1,0 +1,51 @@
+{
+  "name": "flowcapture",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "npm@12.2.0",
+  "description": "FlowCapture AI — consent-first natural-language automation",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "build:packages": "npm run build -w @flowcapture/shared-types && npm run build -w @flowcapture/workflow-schema && npm run build -w @flowcapture/node-definitions && npm run build -w @flowcapture/database",
+    "build": "npm run build:packages && npm run build -w @flowcapture/api && npm run build -w @flowcapture/web",
+    "dev": "concurrently --names api,web --prefix-colors blue,green \"npm run dev -w @flowcapture/api\" \"npm run dev -w @flowcapture/web\"",
+    "dev:api": "npm run dev -w @flowcapture/api",
+    "dev:web": "npm run dev -w @flowcapture/web",
+    "lint": "eslint .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "prisma:generate": "npm run generate -w @flowcapture/database",
+    "prisma:validate": "npm run validate -w @flowcapture/database",
+    "start": "npm run start:prod -w @flowcapture/api"
+  },
+  "engines": {
+    "node": ">=22.12.0",
+    "npm": ">=12.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^22.19.0",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.48.0",
+    "vite": "7.3.7",
+    "vitest": "4.1.12"
+  },
+  "allowScripts": {
+    "@prisma/client@6.19.3": true,
+    "@prisma/engines@6.19.3": true,
+    "prisma@6.19.3": true,
+    "argon2@0.45.1": true,
+    "esbuild@0.28.2": true,
+    "unrs-resolver@1.12.2": true,
+    "@scarf/scarf": false
+  }
+}
