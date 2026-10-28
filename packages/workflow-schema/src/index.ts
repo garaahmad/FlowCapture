@@ -178,3 +178,115 @@ export const workflowDefinitionJsonSchema = z.toJSONSchema(
   workflowDefinitionSchema,
   { io: "input", unrepresentable: "throw" },
 );
+
+const boundedText = (max: number) => z.string().trim().min(1).max(max);
+
+export const plannerIntentSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    name: boundedText(120),
+    purpose: boundedText(1000),
+    trigger: workflowTriggerSchema,
+    actions: z.array(workflowStepSchema).max(MAX_WORKFLOW_STEPS),
+    unsupportedSteps: z.array(boundedText(300)).max(20).default([]),
+    assumptions: z.array(boundedText(300)).max(20).default([]),
+    dataRead: z.array(boundedText(200)).max(20).default([]),
+    dataWritten: z.array(boundedText(200)).max(20).default([]),
+    timingUnknowns: z.array(z.enum(["time"])).max(1).default([]),
+  })
+  .strict();
+
+export const clarificationQuestionSchema = z
+  .object({
+    id: boundedText(160),
+    stepId: nodeIdSchema,
+    field: boundedText(100),
+    kind: z.enum(["url", "email", "text"]),
+    question: boundedText(400),
+    required: z.literal(true),
+  })
+  .strict();
+
+export const automationPlanDefinitionSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    name: boundedText(120),
+    purpose: boundedText(1000),
+    trigger: workflowTriggerSchema,
+    steps: z.array(workflowStepSchema).max(MAX_WORKFLOW_STEPS),
+    feasibility: z.enum(["supported", "partially_supported", "unsupported"]),
+    unsupportedSteps: z.array(boundedText(300)).max(20),
+    questions: z.array(clarificationQuestionSchema).max(30),
+    services: z.array(z.object({
+      provider: boundedText(80),
+      credentialType: z.enum(["http_api", "google"]),
+      scopes: z.array(boundedText(200)).max(20),
+      reason: boundedText(300),
+    }).strict()).max(20),
+    sideEffects: z.array(z.object({
+      stepId: nodeIdSchema,
+      description: boundedText(300),
+      risk: z.enum(["low", "moderate", "high"]),
+    }).strict()).max(20),
+    assumptions: z.array(boundedText(300)).max(20),
+    dataRead: z.array(boundedText(200)).max(20),
+    dataWritten: z.array(boundedText(200)).max(20),
+    failureHandling: z.object({
+      onError: z.literal("stop"),
+      retrySafeSteps: z.boolean(),
+    }).strict(),
+    runtimeReady: z.boolean(),
+    planner: z.enum(["deterministic", "llm"]),
+  })
+  .strict();
+
+export type PlannerIntent = z.infer<typeof plannerIntentSchema>;
+export type ClarificationQuestion = z.infer<typeof clarificationQuestionSchema>;
+export type AutomationPlanDefinition = z.infer<typeof automationPlanDefinitionSchema>;
+
+export const plannerIntentJsonSchema = z.toJSONSchema(plannerIntentSchema, {
+  io: "output",
+  unrepresentable: "throw",
+});
+
+export interface AutomationPlanDto {
+  id: string;
+  conversationId: string;
+  version: number;
+  status: "draft" | "needs_clarification" | "approved" | "changes_requested";
+  definition: AutomationPlanDefinition;
+  contentHash: string;
+  feasibility: "supported" | "partially_supported" | "unsupported";
+  createdAt: string;
+  approvedAt?: string;
+}
+
+export interface ConversationMessageDto {
+  id: string;
+  role: "user" | "assistant" | "system";
+  kind: "text" | "clarification" | "plan" | "error";
+  content: string;
+  planId?: string;
+  payload: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+export interface ConversationSummaryDto {
+  id: string;
+  title: string;
+  status: "draft" | "active" | "archived";
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface ConversationDetailDto extends ConversationSummaryDto {
+  messages: ConversationMessageDto[];
+  plans: AutomationPlanDto[];
+}
+
+export interface SendMessageResponseDto {
+  message: ConversationMessageDto;
+  assistant: ConversationMessageDto;
+  plan?: AutomationPlanDto;
+  redactedSecrets: boolean;
+}

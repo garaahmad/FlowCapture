@@ -104,7 +104,7 @@ AI code can propose only data inside these boundaries. Authorization, feasibilit
 
 ## 5. Environments and current limitations
 
-The implementation sandbox has Node.js 22 and npm, but no Docker, PostgreSQL, Redis, or browser automation runtime preinstalled. No LLM, OAuth, SMTP, payment, or production secret provider is configured. Docker assets and external-provider adapters can be implemented and statically checked, but live integration claims require the relevant services and credentials. No paid service or public deployment will be activated.
+The implementation sandbox has Node.js 22 and npm, but no Docker, PostgreSQL, Redis, or browser automation runtime preinstalled. No live LLM, OAuth, SMTP, payment, or production secret provider is configured. The Phase 2 planning milestone now includes deterministic and configurable OpenAI-compatible adapters, persisted planning models/APIs, and chat/plan-review UI; only unit, static, build, and unauthenticated HTTP checks have run. Live integration claims require the relevant services and credentials. No paid service or public deployment will be activated.
 
 ## 6. Open decisions and launch risks
 

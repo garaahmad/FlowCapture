@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { CheckCircle2, MailWarning, ShieldCheck, Workflow } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -27,8 +28,8 @@ export default function DashboardPage() {
           <CardContent><dl className="space-y-3 text-sm"><div className="flex justify-between gap-4"><dt className="text-muted">Plan</dt><dd className="font-semibold capitalize">{user.workspace.planCode}</dd></div><div className="flex justify-between gap-4"><dt className="text-muted">Timezone</dt><dd className="font-semibold" dir="ltr">{user.timezone}</dd></div><div className="flex justify-between gap-4"><dt className="text-muted">Language</dt><dd className="font-semibold">{user.preferredLanguage === "ar" ? "العربية" : "English"}</dd></div></dl></CardContent>
         </Card>
         <Card className="border-dashed bg-surface/60">
-          <CardHeader><span className="grid size-10 place-items-center rounded-xl bg-surface-raised text-muted"><Workflow className="size-5" /></span><CardTitle className="mt-3">No automations yet</CardTitle><CardDescription>The AI planning and execution phases are not enabled in this foundation build. No sample workflows or simulated run results are shown.</CardDescription></CardHeader>
-          <CardContent><p className="text-xs leading-5 text-muted">Next product milestone: conversation → clarification → grounded plan → explicit approval.</p></CardContent>
+          <CardHeader><span className="grid size-10 place-items-center rounded-xl bg-surface-raised text-muted"><Workflow className="size-5" /></span><CardTitle className="mt-3">Plan before you automate</CardTitle><CardDescription>Start a persisted conversation, answer grounded clarification questions, and review an immutable plan. Workflow execution is not enabled yet.</CardDescription></CardHeader>
+          <CardContent><p className="text-xs leading-5 text-muted">No sample workflows or simulated run results are shown.</p><Button asChild className="mt-4"><Link href="/app/chat">Start a plan</Link></Button></CardContent>
         </Card>
       </div>
     </div>

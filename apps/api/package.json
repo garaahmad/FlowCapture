@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@flowcapture/database": "0.1.0",
+    "@flowcapture/node-definitions": "0.1.0",
     "@flowcapture/shared-types": "0.1.0",
     "@flowcapture/workflow-schema": "0.1.0",
     "@nestjs/common": "12.3.2",

@@ -52,6 +52,8 @@ model User {
   sessions  Session[]
   authTokens AuthToken[]
   auditLogs AuditLog[]
+  conversations Conversation[]
+  planApprovals PlanApproval[]
 
   @@unique([id, workspaceId])
   @@index([workspaceId])
@@ -110,4 +112,111 @@ model AuditLog {
   @@index([workspaceId, createdAt])
   @@index([actorUserId, createdAt])
   @@map("audit_logs")
+}
+
+enum ConversationStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum MessageKind {
+  TEXT
+  CLARIFICATION
+  PLAN
+  ERROR
+}
+
+enum PlanStatus {
+  DRAFT
+  NEEDS_CLARIFICATION
+  APPROVED
+  CHANGES_REQUESTED
+}
+
+enum Feasibility {
+  SUPPORTED
+  PARTIALLY_SUPPORTED
+  UNSUPPORTED
+}
+
+model Conversation {
+  id           String            @id @default(uuid()) @db.Uuid
+  workspaceId  String            @map("workspace_id") @db.Uuid
+  userId       String            @map("user_id") @db.Uuid
+  title        String            @db.VarChar(200)
+  status       ConversationStatus @default(DRAFT)
+  draftState   Json?             @map("draft_state") @db.JsonB
+  createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  archivedAt   DateTime?         @map("archived_at") @db.Timestamptz(6)
+
+  user         User              @relation(fields: [userId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  messages     Message[]
+  plans        AutomationPlan[]
+
+  @@unique([id, workspaceId])
+  @@index([workspaceId, updatedAt])
+  @@map("conversations")
+}
+
+model Message {
+  id              String      @id @default(uuid()) @db.Uuid
+  conversationId  String      @map("conversation_id") @db.Uuid
+  workspaceId     String      @map("workspace_id") @db.Uuid
+  role            MessageRole
+  kind            MessageKind @default(TEXT)
+  content         String      @db.Text
+  payload         Json?       @db.JsonB
+  planId          String?     @map("plan_id") @db.Uuid
+  clientMessageId String?     @map("client_message_id") @db.VarChar(100)
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  conversation Conversation @relation(fields: [conversationId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+
+  @@unique([conversationId, clientMessageId])
+  @@index([conversationId, createdAt])
+  @@index([workspaceId, createdAt])
+  @@map("messages")
+}
+
+model AutomationPlan {
+  id             String       @id @default(uuid()) @db.Uuid
+  conversationId String       @map("conversation_id") @db.Uuid
+  workspaceId    String       @map("workspace_id") @db.Uuid
+  version        Int
+  status         PlanStatus   @default(DRAFT)
+  definition     Json         @db.JsonB
+  contentHash    String       @map("content_hash") @db.Char(64)
+  feasibility    Feasibility
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  conversation   Conversation @relation(fields: [conversationId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  approvals      PlanApproval[]
+
+  @@unique([conversationId, version])
+  @@unique([id, workspaceId])
+  @@index([workspaceId, createdAt])
+  @@map("automation_plans")
+}
+
+model PlanApproval {
+  id               String   @id @default(uuid()) @db.Uuid
+  planId           String   @unique @map("plan_id") @db.Uuid
+  workspaceId      String   @map("workspace_id") @db.Uuid
+  approvedByUserId String   @map("approved_by_user_id") @db.Uuid
+  planHash         String   @map("plan_hash") @db.Char(64)
+  approvedAt       DateTime @default(now()) @map("approved_at") @db.Timestamptz(6)
+
+  plan             AutomationPlan @relation(fields: [planId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  approvedBy       User           @relation(fields: [approvedByUserId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+
+  @@index([workspaceId, approvedAt])
+  @@map("plan_approvals")
 }

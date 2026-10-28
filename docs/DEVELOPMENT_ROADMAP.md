@@ -34,17 +34,17 @@ This roadmap is dependency-ordered. Checkboxes mean verified implementation, not
 
 ## Phase 2 — AI planning
 
-- [ ] Conversation list/detail, persisted messages, retries, and draft preservation.
-- [ ] Provider-neutral LLM adapter with structured JSON output, timeout, and bounded retry.
-- [ ] Intent extraction for Arabic/English with schema validation and prompt-injection boundaries.
-- [ ] Registry-grounded feasibility and incremental clarification.
-- [ ] Human-readable versioned plans, scope/data-flow report, draft/change/approve endpoints.
-- [ ] Immutable approval hashes and material-change reapproval tests.
-- [ ] Chat UI with clarification and plan cards; no fake streaming or progress.
-- [ ] Representative Arabic/English planner evaluations and invalid-output tests.
+- [x] Conversation list/detail APIs, idempotent client message IDs, and persisted-message flow implemented; live DB verification pending.
+- [x] Provider-neutral adapter with strict structured output, timeout, and bounded retry (mocked contract test).
+- [x] Deterministic Arabic/English intent extraction with schema validation and prompt-injection boundaries.
+- [x] Registry-grounded feasibility and incremental clarification with planner evaluations.
+- [x] Human-readable versioned plans, scope/data-flow report, draft/change/approve endpoints.
+- [x] Immutable canonical approval hashes and stale-hash rejection tests; material-change E2E remains pending.
+- [x] Chat UI with clarification and plan cards; no fake streaming or progress. Full Arabic UI copy remains open.
+- [x] Representative deterministic Arabic/English cases and invalid-LLM-output retry test; live model quality remains open.
 
 **Depends on:** Phase 1 identity and database; initial registry contracts.  
-**External gate:** Live model quality cannot be certified without a provider and evaluation run.
+**External gate:** Live model quality and real conversation/approval persistence cannot be certified without provider and PostgreSQL evaluation runs. Phase 2 is not end-to-end complete.
 
 ## Phase 3 — Workflow runtime
 

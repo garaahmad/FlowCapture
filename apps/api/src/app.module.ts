@@ -10,6 +10,7 @@ import { DatabaseModule } from "./modules/database/database.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { ProfileModule } from "./modules/profile/profile.module";
 import { HealthModule } from "./modules/health/health.module";
+import { PlanningModule } from "./modules/planning/planning.module";
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { HealthModule } from "./modules/health/health.module";
     AuthModule,
     ProfileModule,
     HealthModule,
+    PlanningModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: HttpExceptionFilter },

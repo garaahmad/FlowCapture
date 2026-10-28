@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, LogOut, Settings } from "lucide-react";
+import { LayoutDashboard, LogOut, MessageSquareText, Settings } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { UserProfileDto } from "@/lib/contracts";
 import { logout } from "@/lib/auth";
@@ -15,6 +15,7 @@ import { Alert } from "@/components/ui/alert";
 
 const links = [
   { href: "/app", label: "Overview", icon: LayoutDashboard },
+  { href: "/app/chat", label: "AI builder", icon: MessageSquareText },
   { href: "/app/settings", label: "Settings", icon: Settings },
 ];
 

@@ -3,7 +3,16 @@ import { Prisma, PrismaClient } from "@prisma/client";
 export type DatabaseClient = PrismaClient;
 export type DatabaseTransaction = Prisma.TransactionClient;
 export { Prisma, PrismaClient } from "@prisma/client";
-export type { User, Workspace, Session, AuditLog } from "@prisma/client";
+export type {
+  User,
+  Workspace,
+  Session,
+  AuditLog,
+  Conversation,
+  Message,
+  AutomationPlan,
+  PlanApproval,
+} from "@prisma/client";
 
 export interface TenantContext {
   userId: string;

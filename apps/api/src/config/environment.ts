@@ -17,6 +17,12 @@ export const environmentSchema = z.object({
   SESSION_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(30),
   SMTP_URL: z.string().optional(),
   MAIL_FROM: z.string().max(320).optional(),
+  PLANNER_MODE: z.enum(["disabled", "deterministic", "openai"]).default("disabled"),
+  LLM_BASE_URL: z.string().url().default("https://api.openai.com/v1"),
+  LLM_API_KEY: z.string().optional(),
+  LLM_MODEL: z.string().max(200).optional(),
+  LLM_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60_000).default(30_000),
+  LLM_MAX_RETRIES: z.coerce.number().int().min(0).max(2).default(1),
 });
 
 export type AppEnvironment = z.infer<typeof environmentSchema>;
@@ -33,6 +39,12 @@ export function validateEnvironment(environment: Record<string, unknown>): AppEn
     }
     if (parsed.data.SMTP_URL && !parsed.data.MAIL_FROM) {
       throw new Error("MAIL_FROM is required when SMTP_URL is configured");
+    }
+    if (parsed.data.PLANNER_MODE === "deterministic") {
+      throw new Error("Deterministic planning is development-only; configure openai or disabled in production");
+    }
+    if (parsed.data.PLANNER_MODE === "openai" && (!parsed.data.LLM_API_KEY || !parsed.data.LLM_MODEL)) {
+      throw new Error("LLM_API_KEY and LLM_MODEL are required for OpenAI planning");
     }
   }
   return parsed.data;

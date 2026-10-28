@@ -1,6 +1,6 @@
 # Database Design
 
-**Status:** Phase 1 baseline; later entities are specified for the MVP roadmap  
+**Status:** Phase 2 identity + planning schema implemented (13 tables); live migrations pending
 **Database:** PostgreSQL 16+  
 **ORM:** Prisma
 
@@ -42,10 +42,10 @@
 ## Phase 2 tables
 
 ### `conversations`
-`id`, `workspaceId`, `userId`, `title`, `status`, safe `draftState` JSON, `createdAt`, `updatedAt`, `archivedAt`.
+`id`, `workspaceId`, `userId`, `title`, `status`, safe `draftState` JSON, `createdAt`, `updatedAt`, `archivedAt`. Queries always include workspace ownership; the user/workspace relation is composite.
 
 ### `messages`
-`id`, `conversationId`, `workspaceId`, `role`, `kind`, `content`, structured `payload`, provider/model metadata where safe, `errorCode`, `createdAt`. A uniqueness key on client message ID plus conversation prevents duplicate submissions.
+`id`, `conversationId`, `workspaceId`, `role`, `kind`, redacted `content`, safe structured `payload`, optional `clientMessageId`/`planId`, `createdAt`. Safe error codes live in payload metadata. A uniqueness key on client message ID plus conversation prevents duplicate user submissions.
 
 ### `automation_plans`
 `id`, `conversationId`, `workspaceId`, `version`, `status`, immutable `definition` JSONB, `contentHash`, `feasibility`, `createdAt`. Unique `(conversationId, version)`.

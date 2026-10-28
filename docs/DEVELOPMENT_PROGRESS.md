@@ -1,6 +1,6 @@
 # Development Progress
 
-**Current phase:** Phase 1 — Foundation milestone implemented; live database/Compose gate open  
+**Current phase:** Phase 2 — Planning milestone implemented; live database/provider gate open
 **Branch:** `arena/24c73bfc-flowcapture`  
 **Last updated:** 2026-10-28
 
@@ -20,6 +20,19 @@
 - Implemented the responsive landing page, auth/reset/verification screens, onboarding, authenticated shell, dashboard empty state, and connected profile settings.
 - Added canonical workflow schema/reference validation and a schema-only node registry; no runtime capability is falsely advertised.
 - Added Docker Compose/Dockerfiles, secret-free examples, developer documentation, and opt-in PostgreSQL integration tests.
+
+## Phase 2 planning milestone (2026-10-28)
+
+- Added the four planning tables and handwritten migration; Prisma generation passed, but the SQL has not run against PostgreSQL.
+- Added workspace-scoped conversation/message/plan/approval APIs, idempotent client message IDs, safe error messages, and exact-version/hash approval.
+- Added deterministic and OpenAI-compatible structured-output planners. Provider intent is independently checked against the registry; no AI-generated code is executed.
+- Added likely-secret redaction before persistence/provider calls, canonical SHA-256 plan hashes, scope/side-effect review, and change requests.
+- Added `/app/chat` with real conversation/history/message/plan API wiring and honest non-streaming pending states.
+- **Verification:** lint, all workspace typechecks, package/Prisma generation, API build, Next.js production build (13 routes), and **32 tests across 13 files** passed.
+- Planner tests cover English/Arabic supported tasks, missing schedule/recipient clarification, unsupported browser automation, independent feasibility, redaction, hash stability, exact-hash approval, and one bounded invalid-provider-output retry with mocked HTTP.
+- Runtime smoke passed: liveness 200; expected readiness 503 without PostgreSQL; `/app/chat` 200; unauthenticated conversation list and approval both 401; six planning OpenAPI path patterns present.
+- `npm run test:integration` discovered **2 skipped tests** (identity and planning) because `RUN_DATABASE_TESTS` is unset; skips are not passes. The planning specification covers tenant isolation, idempotency, stale hashes, approval, and revision creation.
+- Phase 2 is **not end-to-end complete**: live PostgreSQL conversation/approval flows, migrations, real LLM quality/latency/cost, and Docker Compose remain unverified.
 
 ## Phase 1 verification evidence (2026-10-28)
 
@@ -74,7 +87,7 @@ No unresolved issue was found by the executed checks. Live registration/login, m
 
 ## Next steps
 
-1. Commit the verified Phase 1 foundation milestone without marking its live database gate complete.
-2. Begin Phase 2 contracts and tests while preserving the open identity integration verification task.
-3. Run real PostgreSQL migrations/auth/tenant tests when a database and Prisma runtime engine are available.
-4. Implement conversation persistence, grounded planning, clarification, immutable plans, and approvals as the next vertical slice.
+1. Run real PostgreSQL migrations and auth/conversation/approval tenant tests when a database and Prisma runtime engine are available.
+2. Run the configured provider against a representative Arabic/English evaluation set; record quality, latency, retries, tokens, and cost.
+3. Complete bilingual chat/plan-review copy and browser E2E coverage.
+4. Begin Phase 3 after reviewing these open planning gates: deterministic compilation from an exact approval, immutable workflow versions, constrained execution, dry runs, and schedules.

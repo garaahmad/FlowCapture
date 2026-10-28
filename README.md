@@ -2,7 +2,7 @@
 
 Consent-first, natural-language automation. The product journey is **describe → clarify → check feasibility → approve → build → connect → test → activate → monitor**.
 
-This repository is under active MVP development. The current foundation includes the monorepo, identity/profile APIs, responsive authentication and onboarding UI, canonical workflow contracts, and initial schema-only node registry. It does **not** yet claim AI planning, executable workflows, or live third-party integrations.
+This repository is under active MVP development. The current milestone includes identity/profile APIs, responsive authentication/onboarding, canonical workflow contracts, a schema-only node registry, persisted planning APIs, deterministic/OpenAI-compatible planners, and a chat/plan-review UI. Real database planning journeys and live-provider quality remain unverified. It does **not** claim executable workflows or live third-party integrations.
 
 ## Stack
 

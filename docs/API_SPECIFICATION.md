@@ -43,12 +43,14 @@ Register/login validation failures use `VALIDATION_ERROR`; invalid login uses th
 | Route | Phase | Behavior |
 |---|---|---|
 | `POST /conversations` | 2 | Create an empty draft conversation. |
-| `GET /conversations` | 2 | Paginated current-workspace history. |
+| `GET /conversations` | 2 | Latest 50 current-workspace conversations, ordered by update time. |
 | `GET /conversations/:id` | 2 | Conversation and ordered messages with ownership check. |
 | `POST /conversations/:id/messages` | 2 | Persist user message, run bounded planning, return assistant/clarification/plan response. |
 | `GET /plans/:id` | 2 | Immutable plan and human-readable report. |
 | `POST /plans/:id/approve` | 2 | Approve exact `version` and `contentHash`; requires feasibility and no unresolved blocking questions. |
-| `POST /plans/:id/change-requests` | 2 | Create a draft revision; never mutates an approved version. |
+| `POST /plans/:id/change-requests` | 2 | Mark the version `changes_requested`; the next user message creates a new immutable version. |
+
+Message creation accepts `{ content, clientMessageId }`. Approval accepts `{ version, contentHash, confirmScopes: true }`; a changed version/hash returns `PLAN_VERSION_CONFLICT`. Plan approval never implies workflow activation or live-effect consent.
 
 ## Workflows and executions
 

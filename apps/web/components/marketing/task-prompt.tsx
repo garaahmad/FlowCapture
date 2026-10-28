@@ -19,7 +19,7 @@ export function TaskPrompt() {
     event?.preventDefault();
     try {
       sessionStorage.setItem("flowcapture.draftTask", task.trim());
-      sessionStorage.setItem("flowcapture.postOnboarding", "/app");
+      sessionStorage.setItem("flowcapture.postOnboarding", "/app/chat");
     } catch {
       // Storage can be unavailable in strict privacy modes; registration still works.
     }
