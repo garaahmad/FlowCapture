@@ -1,8 +1,8 @@
 # Development Progress
 
 **Current phase:** Phase 2 — Planning milestone implemented; live database/provider gate open
-**Branch:** `arena/24c73bfc-flowcapture`  
-**Last updated:** 2026-10-28
+**Branch:** `arena/167b1394-flowcapture`
+**Last updated:** 2026-11-01
 
 ## Completed
 
@@ -20,6 +20,16 @@
 - Implemented the responsive landing page, auth/reset/verification screens, onboarding, authenticated shell, dashboard empty state, and connected profile settings.
 - Added canonical workflow schema/reference validation and a schema-only node registry; no runtime capability is falsely advertised.
 - Added Docker Compose/Dockerfiles, secret-free examples, developer documentation, and opt-in PostgreSQL integration tests.
+
+## Gemini/Groq provider integration (2026-11-01)
+
+- Added separate server-only Gemini and Groq endpoint/key/model configuration while retaining the generic OpenAI-compatible provider.
+- Added optional remote fallback (for example, Gemini primary and Groq secondary), configuration validation, bounded retries, and no retry for non-retryable HTTP responses.
+- Both providers use the existing strict JSON-schema intent boundary and independent registry feasibility checks. No provider can execute code or authorize side effects.
+- Local credentials are kept in ignored `.env`; committed examples contain placeholders only. No credential is exposed through `NEXT_PUBLIC_*` variables.
+- Unit coverage includes provider-specific endpoints/models, authorization headers with dummy values, invalid-output retry, non-retryable responses, fallback behavior, and production configuration validation.
+- **Verification:** lint, every workspace typecheck, **40 tests across 14 files**, and API/web production builds passed. API startup with the local Gemini-primary/Groq-fallback configuration succeeded; web/chat and liveness smoke checks returned 200, while readiness remained 503 without PostgreSQL.
+- Live Gemini/Groq calls were **not** made: sandbox egress does not allow either provider host. Model availability, account access, Arabic quality, latency, tokens, and cost remain unverified.
 
 ## Phase 2 planning milestone (2026-10-28)
 

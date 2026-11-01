@@ -50,6 +50,10 @@ npm run dev
 
 The browser uses relative `/backend/*` URLs; Next.js rewrites them to the API. Do not put credentials in `NEXT_PUBLIC_*` variables.
 
+### AI planner providers
+
+Set `PLANNER_MODE` to `gemini`, `groq`, `openai`, `deterministic` (development only), or `disabled`. Gemini and Groq have separate server-only `*_API_KEY`, `*_MODEL`, and `*_BASE_URL` settings. A remote provider can optionally set a different `PLANNER_FALLBACK_MODE`; for example, Gemini primary with Groq fallback. Provider output uses structured JSON and is independently validated against the planner schema and node registry. Keys must remain in `.env` or a deployment secret manager—never in frontend code or Git.
+
 Alternatively, use `docker compose up --build` after reviewing `infrastructure/README.md`.
 
 ## Verification

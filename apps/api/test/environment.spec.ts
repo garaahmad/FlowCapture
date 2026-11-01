@@ -22,6 +22,34 @@ describe("environment validation", () => {
     })).toThrow("ALLOW_PREVIEW_ORIGINS");
   });
 
+  it("accepts explicitly configured Gemini primary and Groq fallback providers", () => {
+    const result = validateEnvironment({
+      ...base,
+      NODE_ENV: "production",
+      ALLOW_PREVIEW_ORIGINS: "false",
+      PLANNER_MODE: "gemini",
+      PLANNER_FALLBACK_MODE: "groq",
+      GEMINI_API_KEY: "gemini-test-key",
+      GROQ_API_KEY: "groq-test-key",
+    });
+    expect(result.GEMINI_MODEL).toBe("gemini-3.8-flash");
+    expect(result.GROQ_MODEL).toBe("openai/gpt-oss-20b");
+  });
+
+  it("fails closed when an enabled production provider has no credential", () => {
+    expect(() => validateEnvironment({
+      ...base,
+      NODE_ENV: "production",
+      ALLOW_PREVIEW_ORIGINS: "false",
+      PLANNER_MODE: "gemini",
+    })).toThrow("gemini API key");
+  });
+
+  it("rejects duplicate or meaningless fallback configuration", () => {
+    expect(() => validateEnvironment({ ...base, PLANNER_MODE: "gemini", PLANNER_FALLBACK_MODE: "gemini" })).toThrow("must differ");
+    expect(() => validateEnvironment({ ...base, PLANNER_MODE: "deterministic", PLANNER_FALLBACK_MODE: "groq" })).toThrow("remote primary");
+  });
+
   it("parses explicit origin allowlists", () => {
     expect(configuredOrigins("https://app.example.com, https://admin.example.com")).toEqual([
       "https://app.example.com",

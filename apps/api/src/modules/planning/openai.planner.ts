@@ -6,8 +6,8 @@ import {
   type PlannerIntent,
 } from "@flowcapture/workflow-schema";
 import { z } from "zod";
-import type { AppEnvironment } from "../../config/environment";
-import type { PlannerInput, PlannerProvider } from "./planner.provider";
+import type { AppEnvironment, RemotePlannerMode } from "../../config/environment";
+import { PlannerUnavailableError, type PlannerInput, type PlannerProvider } from "./planner.provider";
 
 const providerResponseSchema = z.object({
   choices: z.array(z.object({
@@ -15,21 +15,35 @@ const providerResponseSchema = z.object({
   }).passthrough()).min(1),
 }).passthrough();
 
+const providerSettings = {
+  openai: { apiKey: "LLM_API_KEY", model: "LLM_MODEL", baseUrl: "LLM_BASE_URL" },
+  gemini: { apiKey: "GEMINI_API_KEY", model: "GEMINI_MODEL", baseUrl: "GEMINI_BASE_URL" },
+  groq: { apiKey: "GROQ_API_KEY", model: "GROQ_MODEL", baseUrl: "GROQ_BASE_URL" },
+} as const;
+
+class NonRetryableProviderError extends Error {}
+
+/** OpenAI-compatible structured-output client used for OpenAI, Gemini, and Groq. */
 export class OpenAiPlanner implements PlannerProvider {
   readonly kind = "llm" as const;
 
-  constructor(private readonly config: ConfigService<AppEnvironment, true>) {}
+  constructor(
+    private readonly config: ConfigService<AppEnvironment, true>,
+    readonly provider: RemotePlannerMode = "openai",
+  ) {}
 
   async generate(input: PlannerInput): Promise<PlannerIntent> {
-    const apiKey = this.config.get("LLM_API_KEY");
-    const model = this.config.get("LLM_MODEL");
-    if (!apiKey || !model) throw new Error("LLM provider is not configured");
+    const settings = providerSettings[this.provider];
+    const apiKey = this.config.get(settings.apiKey);
+    const model = this.config.get(settings.model);
+    if (!apiKey || !model) throw new PlannerUnavailableError();
+    const baseUrl = this.config.get(settings.baseUrl);
     const retries = this.config.get("LLM_MAX_RETRIES");
     let lastError: unknown;
 
     for (let attempt = 0; attempt <= retries; attempt += 1) {
       try {
-        const response = await fetch(`${this.config.get("LLM_BASE_URL").replace(/\/$/, "")}/chat/completions`, {
+        const response = await fetch(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
           method: "POST",
           headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
           body: JSON.stringify({
@@ -53,8 +67,8 @@ export class OpenAiPlanner implements PlannerProvider {
           signal: AbortSignal.timeout(this.config.get("LLM_TIMEOUT_MS")),
         });
         if (!response.ok) {
-          const error = new Error(`LLM provider returned ${response.status}`);
-          if (response.status !== 429 && response.status < 500) throw error;
+          const error = new Error(`${this.provider} planner returned ${response.status}`);
+          if (response.status !== 429 && response.status < 500) throw new NonRetryableProviderError(error.message);
           throw error;
         }
         const payload = providerResponseSchema.parse(await response.json());
@@ -63,9 +77,10 @@ export class OpenAiPlanner implements PlannerProvider {
         return plannerIntentSchema.parse(JSON.parse(content));
       } catch (error) {
         lastError = error;
+        if (error instanceof NonRetryableProviderError) break;
       }
     }
-    throw new Error("LLM planning failed after bounded retries", { cause: lastError });
+    throw new Error(`${this.provider} planning failed after bounded attempts`, { cause: lastError });
   }
 }
 

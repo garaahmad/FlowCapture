@@ -4,6 +4,9 @@ const booleanFromString = z
   .enum(["true", "false"])
   .transform((value) => value === "true");
 
+const remotePlannerModes = ["openai", "gemini", "groq"] as const;
+export type RemotePlannerMode = typeof remotePlannerModes[number];
+
 export const environmentSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().min(1).max(65535).default(3001),
@@ -17,10 +20,17 @@ export const environmentSchema = z.object({
   SESSION_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(30),
   SMTP_URL: z.string().optional(),
   MAIL_FROM: z.string().max(320).optional(),
-  PLANNER_MODE: z.enum(["disabled", "deterministic", "openai"]).default("disabled"),
+  PLANNER_MODE: z.enum(["disabled", "deterministic", ...remotePlannerModes]).default("disabled"),
+  PLANNER_FALLBACK_MODE: z.enum(["disabled", ...remotePlannerModes]).default("disabled"),
   LLM_BASE_URL: z.string().url().default("https://api.openai.com/v1"),
   LLM_API_KEY: z.string().optional(),
   LLM_MODEL: z.string().max(200).optional(),
+  GEMINI_BASE_URL: z.string().url().default("https://generativelanguage.googleapis.com/v1beta/openai"),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().max(200).default("gemini-3.8-flash"),
+  GROQ_BASE_URL: z.string().url().default("https://api.groq.com/openai/v1"),
+  GROQ_API_KEY: z.string().optional(),
+  GROQ_MODEL: z.string().max(200).default("openai/gpt-oss-20b"),
   LLM_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60_000).default(30_000),
   LLM_MAX_RETRIES: z.coerce.number().int().min(0).max(2).default(1),
 });
@@ -33,6 +43,14 @@ export function validateEnvironment(environment: Record<string, unknown>): AppEn
     const fields = parsed.error.issues.map((issue) => issue.path.join(".")).join(", ");
     throw new Error(`Invalid API environment configuration: ${fields}`);
   }
+  const primary = parsed.data.PLANNER_MODE;
+  const fallback = parsed.data.PLANNER_FALLBACK_MODE;
+  if (fallback !== "disabled" && (primary === "disabled" || primary === "deterministic")) {
+    throw new Error("PLANNER_FALLBACK_MODE requires a remote primary planner");
+  }
+  if (fallback !== "disabled" && fallback === primary) {
+    throw new Error("PLANNER_FALLBACK_MODE must differ from PLANNER_MODE");
+  }
   if (parsed.data.NODE_ENV === "production") {
     if (parsed.data.ALLOW_PREVIEW_ORIGINS) {
       throw new Error("ALLOW_PREVIEW_ORIGINS must be false in production");
@@ -40,14 +58,24 @@ export function validateEnvironment(environment: Record<string, unknown>): AppEn
     if (parsed.data.SMTP_URL && !parsed.data.MAIL_FROM) {
       throw new Error("MAIL_FROM is required when SMTP_URL is configured");
     }
-    if (parsed.data.PLANNER_MODE === "deterministic") {
-      throw new Error("Deterministic planning is development-only; configure openai or disabled in production");
+    if (primary === "deterministic") {
+      throw new Error("Deterministic planning is development-only; configure a remote planner or disabled in production");
     }
-    if (parsed.data.PLANNER_MODE === "openai" && (!parsed.data.LLM_API_KEY || !parsed.data.LLM_MODEL)) {
-      throw new Error("LLM_API_KEY and LLM_MODEL are required for OpenAI planning");
+    for (const mode of [primary, fallback]) {
+      if (mode === "disabled") continue;
+      assertRemotePlannerConfigured(parsed.data, mode);
     }
   }
   return parsed.data;
+}
+
+function assertRemotePlannerConfigured(environment: AppEnvironment, mode: RemotePlannerMode): void {
+  const configured = mode === "openai"
+    ? environment.LLM_API_KEY && environment.LLM_MODEL
+    : mode === "gemini"
+      ? environment.GEMINI_API_KEY && environment.GEMINI_MODEL
+      : environment.GROQ_API_KEY && environment.GROQ_MODEL;
+  if (!configured) throw new Error(`${mode} API key and model are required when the provider is enabled`);
 }
 
 export function configuredOrigins(value: string): string[] {
