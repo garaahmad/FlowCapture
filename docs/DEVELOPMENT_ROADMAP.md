@@ -35,7 +35,7 @@ This roadmap is dependency-ordered. Checkboxes mean verified implementation, not
 ## Phase 2 — AI planning
 
 - [x] Conversation list/detail APIs, idempotent client message IDs, and persisted-message flow implemented; live DB verification pending.
-- [x] Provider-neutral adapter with strict structured output, timeout, and bounded retry (mocked contract test).
+- [x] Provider-neutral adapter with strict structured output, timeout, bounded retry, Gemini/Groq configuration, and optional remote fallback (mocked contract tests; live calls pending).
 - [x] Deterministic Arabic/English intent extraction with schema validation and prompt-injection boundaries.
 - [x] Registry-grounded feasibility and incremental clarification with planner evaluations.
 - [x] Human-readable versioned plans, scope/data-flow report, draft/change/approve endpoints.
